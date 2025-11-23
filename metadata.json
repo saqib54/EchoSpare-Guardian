@@ -1,0 +1,9 @@
+{
+  "name": "Ecosphere Guardian",
+  "description": "A comprehensive sustainability platform for food waste reduction, agriculture monitoring, and pollution control using AI.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
