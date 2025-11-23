@@ -15,8 +15,7 @@ A real-time, AI-driven web platform that fights **food waste**, empowers **farme
 ---
 
 ### 🚀 Live Demo  
-🔗 [ecosphere-guardian.netlify.app](https://ecosphere-guardian.netlify.app) *(or your deployed link)*
-
+🔗 [ecosphere-guardian.netlify.app](https://vocal-daifuku-f9da0e.netlify.app/) 
 ---
 
 ### 📸 Project Screenshots
