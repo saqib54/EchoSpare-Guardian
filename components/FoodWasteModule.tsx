@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Camera, Loader2, CheckCircle2, AlertTriangle, HeartHandshake } from 'lucide-react';
+import { Upload, Camera, Loader2, CheckCircle2, AlertTriangle, HeartHandshake, AlertCircle, X } from 'lucide-react';
 import { analyzeImageWithGemini } from '../services/geminiService';
 import { AnalysisResult } from '../types';
 
@@ -7,15 +7,32 @@ const FoodWasteModule: React.FC = () => {
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file type
+      if (!file.type.match('image.*')) {
+        setError('Please upload an image file (JPG, PNG, etc.)');
+        return;
+      }
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size too large. Please upload an image smaller than 5MB.');
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setImage(reader.result as string);
         setResult(null); // Reset previous result
+        setError(null); // Clear any previous errors
+      };
+      reader.onerror = () => {
+        setError('Failed to read the file. Please try another image.');
       };
       reader.readAsDataURL(file);
     }
@@ -24,6 +41,8 @@ const FoodWasteModule: React.FC = () => {
   const analyzeFood = async () => {
     if (!image) return;
     setLoading(true);
+    setError(null);
+    
     try {
       const prompt = `
         Analyze this food image. 
@@ -35,10 +54,21 @@ const FoodWasteModule: React.FC = () => {
       `;
       const data = await analyzeImageWithGemini(image, prompt);
       setResult(data);
-    } catch (error) {
-      alert("Failed to analyze image. Please try again.");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to analyze image. Please try again.';
+      setError(errorMessage);
+      console.error('Food analysis error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setImage(null);
+    setResult(null);
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -54,17 +84,28 @@ const FoodWasteModule: React.FC = () => {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div 
             className="border-2 border-dashed border-slate-300 rounded-xl h-64 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors relative overflow-hidden"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => !loading && fileInputRef.current?.click()}
           >
             {image ? (
-              <img src={image} alt="Uploaded food" className="w-full h-full object-cover" />
+              <>
+                <img src={image} alt="Uploaded food" className="w-full h-full object-cover" />
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeImage();
+                  }}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                >
+                  <X size={16} />
+                </button>
+              </>
             ) : (
               <div className="text-center p-4">
                 <div className="bg-emerald-100 p-4 rounded-full inline-block mb-3">
                   <Camera className="text-emerald-600" size={32} />
                 </div>
                 <p className="font-medium text-slate-700">Click to upload or capture</p>
-                <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG</p>
+                <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG (max 5MB)</p>
               </div>
             )}
             <input 
@@ -72,9 +113,18 @@ const FoodWasteModule: React.FC = () => {
               ref={fileInputRef} 
               className="hidden" 
               accept="image/*" 
-              onChange={handleImageUpload} 
+              onChange={handleImageUpload}
+              disabled={loading}
             />
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start">
+              <AlertCircle className="text-red-500 mr-2 mt-0.5" size={16} />
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          )}
 
           <div className="mt-6">
             <button

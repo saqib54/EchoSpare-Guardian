@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { createChatSession } from '../services/geminiService';
 import { Chat } from "@google/genai";
 
@@ -15,13 +15,22 @@ const AIAssistant: React.FC = () => {
     { role: 'model', text: 'Hello! I am your EcoBot. Ask me about sustainability, recycling, or how to use this app!' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState(true);
   const chatSession = useRef<Chat | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Initialize chat session once
-    if (!chatSession.current) {
-      chatSession.current = createChatSession();
+    const session = createChatSession();
+    if (session) {
+      chatSession.current = session;
+    } else {
+      // AI is not available
+      setAiAvailable(false);
+      setMessages(prev => [...prev, { 
+        role: 'model', 
+        text: "AI services are currently unavailable. Please configure your Gemini API key in the .env file to enable AI features." 
+      }]);
     }
   }, []);
 
@@ -34,7 +43,7 @@ const AIAssistant: React.FC = () => {
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !aiAvailable) return;
 
     const userMessage = input.trim();
     setInput('');
@@ -48,7 +57,13 @@ const AIAssistant: React.FC = () => {
         setMessages(prev => [...prev, { role: 'model', text: responseText }]);
       }
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'model', text: "Sorry, I encountered an error. Please try again." }]);
+      console.error("AI Assistant Error:", error);
+      // Provide more detailed error message
+      let errorMessage = "Sorry, I encountered an error. Please try again.";
+      if (error instanceof Error) {
+        errorMessage = `Error: ${error.message}`;
+      }
+      setMessages(prev => [...prev, { role: 'model', text: errorMessage }]);
     } finally {
       setIsLoading(false);
     }
@@ -105,17 +120,32 @@ const AIAssistant: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask for advice..."
-              className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder={aiAvailable ? "Ask for advice..." : "AI unavailable"}
+              disabled={!aiAvailable}
+              className={`flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                !aiAvailable ? 'bg-slate-100 text-slate-400' : ''
+              }`}
             />
             <button
               onClick={handleSend}
-              disabled={isLoading || !input.trim()}
-              className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !input.trim() || !aiAvailable}
+              className={`p-2 rounded-lg flex items-center justify-center ${
+                isLoading || !input.trim() || !aiAvailable
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  : 'bg-emerald-600 text-white hover:bg-emerald-700'
+              }`}
             >
               <Send size={18} />
             </button>
           </div>
+          
+          {/* API Key Warning */}
+          {!aiAvailable && (
+            <div className="px-3 pb-2 text-xs text-amber-600 flex items-center">
+              <AlertCircle size={14} className="mr-1" />
+              Add your Gemini API key to .env file to enable AI features
+            </div>
+          )}
         </div>
       )}
 
