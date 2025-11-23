@@ -8,14 +8,15 @@
 [![Eco Friendly](https://img.shields.io/badge/Eco-Friendly-27AE60?style=for-the-badge&logo=terraform)](https://github.com)
 [![AI Powered](https://img.shields.io/badge/AI-Powered-8E44AD?style=for-the-badge&logo=openai)](https://github.com)
 [![Live Demo](https://img.shields.io/badge/Live-Demo-00CEC9?style=for-the-badge&logo=vercel)](https://your-username.github.io/ecosphere-guardian)
-
 > **One Platform. Three Global Problems Solved.**  
 A real-time, AI-driven web platform that fights **food waste**, empowers **farmers**, and monitors **pollution** — building a sustainable future for all.
 
 ---
 
 ### 🚀 Live Demo  
-🔗 [ecosphere-guardian.netlify.app](https://vocal-daifuku-f9da0e.netlify.app/) 
+🔗 [ecosphere-guardian.netlify.app](https://vocal-daifuku-f9da0e.netlify.app/)  
+or try here 
+🔗 [ecosphere-guardianlive.netlify.app](https://ai.studio/apps/drive/1SuDQ3gDU7R_hemunpmWtCCcsV1XO-8mk?fullscreenApplet=true)
 ---
 
 ### 📸 Project Screenshots
