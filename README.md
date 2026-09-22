@@ -42,7 +42,7 @@ or try here
 
 ---
 
-### ✨ Core Features
+### ✨ Core Feature
 
 #### 🍽 Food Waste & Donation
 - Upload food photos → AI detects surplus & expiry risk
